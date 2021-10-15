@@ -12,6 +12,7 @@ public class CategoriaRepository extends BaseRepository {
     }
     
     public List<Categoria> browse(){
+        @SuppressWarnings("JPQLValidation")
         Query qry = this.em.createQuery("FROM Categoria");
         List<Categoria> cats = qry.getResultList();
         this.Finalize();
@@ -25,19 +26,27 @@ public class CategoriaRepository extends BaseRepository {
     }
     
     public Categoria edit(Categoria categoria){
-        Categoria nova = this.em.merge(categoria);
+        Categoria cat = this.em.find(Categoria.class, categoria.getCategoriaID());
+        this.em.detach(cat);
+        this.em.getTransaction().begin();
+        Categoria mergeCategoria = (Categoria)this.em.merge(cat);
+        this.em.getTransaction().commit();
         this.Finalize();
-        return nova;
+        return mergeCategoria;
         
     }
     
     public void add(Categoria categoria){
+        this.em.getTransaction().begin();
         this.em.persist(categoria);
+        this.em.getTransaction().commit();
         this.Finalize();
     }
     
     public void delete(Categoria categoria){
+        this.em.getTransaction().begin();
         this.em.remove(categoria);
+        this.em.getTransaction().commit();
         this.Finalize();
     }
 }
